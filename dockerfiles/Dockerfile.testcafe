@@ -1,0 +1,5 @@
+FROM repo.dev.backgroundcheck.com:8083/node:16
+
+RUN apt-get update && \
+    apt-get -y --no-install-recommends install chromium xvfb dbus ttf-freefont fluxbox procps && \
+    rm -rf /var/lib/apt/lists/*

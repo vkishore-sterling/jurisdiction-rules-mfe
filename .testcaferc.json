@@ -1,0 +1,14 @@
+{
+    "selectorTimeout": 60000,
+    "assertionTimeout": 60000,
+    "pageLoadTimeout": 100000,
+    "screenshots": {
+      "takeOnFails": true,
+      "pathPattern": "${TEST_INDEX}-${FIXTURE}-${TEST}.png"
+    },
+    "browsers": "chromium",
+    "debugOnFail": false,
+    "skipJsErrors": true,
+    "skipUncaughtErrors": false,
+    "quarantineMode": true
+  }

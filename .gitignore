@@ -1,0 +1,17 @@
+# auto-generated
+coverage
+build
+node_modules
+stats.json
+screenshots
+
+# Other Files
+.DS_Store
+npm-debug.log
+.idea
+*.iml
+*~
+.#*
+\#*\#
+.scannerwork/
+**/_uploads_/

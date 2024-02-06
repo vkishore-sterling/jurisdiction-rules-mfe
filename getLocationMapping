@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+# I'm being extra paranoid and making sure not to clone into a directory that already exists, but it *must* be inside the current workspace.
+# `readJSON` doesn't seem to be able to read files outside the workspace
+repoDir=$(basename $(TMPDIR=$PWD mktemp --dir))
+
+git clone https://${SOURCE_CONTROL_USR}:${SOURCE_CONTROL_PSW}@github.com/sterlingcheck/client-hub-api.git --depth 1 --branch location-mapping ${repoDir} >&2
+
+filename="${repoDir}/location-mapping.json"
+test -e "${filename}"
+readlink -n -f "${filename}"

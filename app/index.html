@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <meta name='mobile-web-app-capable' content='yes'>
+  <title>Sterling</title>
+  <style>
+    #app {
+      height: 100%;
+      min-height: 100%;
+    }
+  </style>
+  <% if (htmlWebpackPlugin.options.awsRum.use){ %>
+  <script>(function(n, i, v, r, s, c, x, z) {
+    x = window.AwsRumClient = { q: [], n: n, i: i, v: v, r: r, c: c };
+    window[n] = function(c, p) {
+      x.q.push({ c: c, p: p });
+    };
+    z = document.createElement('script');
+    z.async = true;
+    z.src = s;
+    document.head.insertBefore(z, document.getElementsByTagName('script')[0]);
+  })('cwr', 'cf519766-4bd5-49a2-ba62-c5110bc0f2da', '1.0.0', 'us-east-1', 'https://client.rum.us-east-1.amazonaws.com/1.0.2/cwr.js', {
+    sessionSampleRate: 1,
+    guestRoleArn: 'arn:aws:iam::070297945946:role/RUM-Monitor-us-east-1-070297945946-8722520709361-Unauth',
+    identityPoolId: 'us-east-1:55d72a20-e7b9-44ae-9ffb-352a3756c926',
+    endpoint: 'https://dataplane.rum.us-east-1.amazonaws.com',
+    telemetries: ['performance', 'errors', 'http'],
+    allowCookies: true,
+    enableXRay: false,
+  });</script>
+  <% } %>
+  <script src='https://cdn.backgroundcheck.com/banners/outage.js' type='text/javascript'></script>
+  <script type='text/javascript'>
+    window.onload = function() {
+      Sterling.Banners()
+        .platform('sd')
+        .region('us-east-1')
+        .version('v1.1.1')
+        .type('Outage')
+        .alwaysOnTop(true)
+        .size('small')
+        .init();
+    };
+  </script>
+</head>
+
+<body>
+<p hidden>COMMIT HASH = ###commit_hash###</p>
+<p hidden>COMMIT DATE = ###commit_date###</p>
+<noscript>If you're seeing this message, that means
+  <strong>JavaScript has been disabled on your browser</strong>, please
+  <strong>enable JS</strong> to make this app work.
+</noscript>
+
+<div id='root'></div>
+</body>
+
+</html>

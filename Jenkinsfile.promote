@@ -1,0 +1,74 @@
+pipeline {
+  agent none
+  options {
+    withAWS(region: 'us-east-1')
+    timestamps()
+  }
+  environment {
+    BUCKET_PATH = 'client-user-proxy' // NOTE! This is the one pass to sterling-deploy
+    DOCKER_REGISTRY_URL = 'https://repo.dev.backgroundcheck.com:8083'
+    SOURCE_CONTROL = credentials('GitHub-app-sterlingcheck')
+  }
+  stages {
+    stage('promote') {
+      agent {
+        dockerfile {
+          filename 'Dockerfile.pnpm'
+          args '--entrypoint=\'\' -e HOME=$WORKSPACE'
+          dir 'dockerfiles'
+          registryUrl "${DOCKER_REGISTRY_URL}"
+        }
+      }
+      steps {
+        script {
+          env.DEPLOYMENT_VERSION = sh(returnStdout: true, script: "./versionForReleaseBranch")
+          if("".equals(env.DEPLOYMENT_VERSION) || "null".equals(env.DEPLOYMENT_VERSION)){
+            currentBuild.result = 'ABORTED';
+            error('No version number selected');
+          }
+
+          env.DEPLOY_TO = input(message: "Deploy ${env.DEPLOYMENT_VERSION} to which Environment?",
+                                ok: "Deploy",
+                                parameters: [choice(choices: [
+                                                              // 'dev',
+                                                              'int',
+                                                              'prod',
+                                                              'demo',
+                                                              'pre',
+                                                             ],
+                                                    description: 'Select an environment',
+                                                    name: 'DEPLOY_TO')])
+
+          def locationMapping = sh(returnStdout: true, script: "./getLocationMapping")
+          def eConfig = load('./EnvConfig.groovy');
+          def envConfig = eConfig.getEnvConfig(env);
+          def lConfig = load('./LocationConfig.groovy');
+          def locationConfig = lConfig.getLocationConfig(readJSON(file: locationMapping), env.DEPLOY_TO);
+
+          env.ENV = envConfig.getTargetConfig('env');
+          env.ACCOUNT = envConfig.getTargetConfig('account');
+
+          def instances = locationConfig.getInstances();
+          env.INSTANCE_ID = 'us1';
+          env.BACKWARD_COMPATIBLE = 'true';
+        }
+
+        sh '''
+            pnpm dlx @sterling/deploy promote_mfe \
+              --mfe ${BUCKET_PATH} \
+              --appVersion ${DEPLOYMENT_VERSION} \
+              --instanceId ${INSTANCE_ID} \
+              --env ${ENV} \
+              --unifiedDir true \
+              --backwardCompatible ${BACKWARD_COMPATIBLE} \
+              --loglevel LOG \
+           '''
+      }
+      post {
+        always {
+          cleanWs()
+        }
+      }
+    }
+  }
+}
